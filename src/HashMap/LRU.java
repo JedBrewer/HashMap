@@ -2,6 +2,8 @@ package HashMap;
 
 import java.util.function.Function;
 
+import static java.lang.Math.ceil;
+
 /**
  * Created by jed on 15/10/17.
  * <p>
@@ -21,17 +23,25 @@ public class LRU<K, V> extends ChainLinkHashMap<K, V> {
     private ChainLinkBucket evicted;       // singleton pool
     private ChainLinkBucket current;       // singleton pool
     private int bitShift;
+    private float loadFactor;
 
-    public LRU(int capacity, Function<K, V> lookup) {
+    public LRU(int capacity, float loadFactor, Function<K, V> lookup) {
         super(capacity);
+        if (loadFactor <= 0)
+            throw new IllegalArgumentException("load factor must be positive");
         this.lookup = lookup;
-        bucketCount = capacity;
+        this.loadFactor = loadFactor;
+        initBucketCount();
         initBitShift();
+    }
+
+    private void initBucketCount() {
+        bucketCount = (int) ceil(capacity / loadFactor);
     }
 
     @Override
     protected int bucketCount() {
-        return capacity;
+        return bucketCount;
     }
 
     @Override
